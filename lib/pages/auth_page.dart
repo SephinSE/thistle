@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../authentication.dart';
+import 'package:thistle/app_state.dart';
+import 'package:provider/provider.dart';
 
 class ThistleAuthPage extends StatefulWidget {
   const ThistleAuthPage({super.key});
@@ -17,8 +19,11 @@ class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderSt
   String? errorMessage = '';
   bool isLogin = true;
 
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _controllerEmail = TextEditingController();
   final TextEditingController _controllerPassword = TextEditingController();
+  final TextEditingController _controllerConfirmPassword = TextEditingController();
+  bool _isRegistering = false;
 
   Future<void> signInWithEmailAndPassword() async {
     try {
@@ -34,6 +39,9 @@ class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderSt
   }
 
   Future<void> createUserWithEmailAndPassword() async {
+    setState(() {
+      _isRegistering = true; // Disable button while registering
+    });
     try {
       await Auth().createUserWithEmailAndPassword(
         email: _controllerEmail.text,
@@ -42,6 +50,10 @@ class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderSt
     } on FirebaseAuthException catch (e) {
       setState(() {
         errorMessage = e.message;
+      });
+    } finally {
+      setState(() {
+        _isRegistering = false;
       });
     }
   }
@@ -69,6 +81,8 @@ class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    var appState = context.watch<ApplicationState>();
+
     const textStyle = TextStyle(
       fontFamily: 'Roboto Flex',
       fontWeight: FontWeight.w400,
@@ -169,6 +183,7 @@ class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderSt
                     Padding(
                       padding: EdgeInsets.fromLTRB(padding, 4, padding, 12),
                       child: Form(
+                        key: _formKey,
                         child: Column(
                           children: <Widget>[
                             Padding(
@@ -206,6 +221,7 @@ class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderSt
                                       sigmaY: 8,
                                     ),
                                     child: TextFormField(
+                                      controller: appState.controllerFullName,
                                       decoration: formStyle.copyWith(hintText: 'full name'),
                                       style: textStyle.copyWith(
                                         fontSize: 20,
@@ -255,6 +271,7 @@ class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderSt
                                       sigmaY: 8,
                                     ),
                                     child: TextFormField(
+                                      controller: _controllerConfirmPassword,
                                       decoration: formStyle.copyWith(hintText: 'confirm password'),
                                       obscureText: true,
                                       style: textStyle.copyWith(
@@ -274,11 +291,18 @@ class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderSt
                               width: double.infinity,
                               child: ElevatedButton(
                                 onPressed: () {
-                                  //context.push('/home');
-                                  isLogin ? signInWithEmailAndPassword() : createUserWithEmailAndPassword();
+                                  if (!isLogin && _controllerPassword.text != _controllerConfirmPassword.text) {
+                                    setState(() {
+                                      errorMessage = 'Passwords do not match! Please try again';
+                                    });
+                                    return;
+                                  }
+                                  if (_formKey.currentState!.validate() && !_isRegistering) {
+                                    isLogin ? signInWithEmailAndPassword() : createUserWithEmailAndPassword();
+                                  }
                                 },
                                 style: buttonStyle,
-                                child: Text(isLogin ? 'sign in' : 'register')
+                                child: _isRegistering ? const CircularProgressIndicator() : Text(isLogin ? 'sign in' : 'register'),
                               ),
                             ),
                           ],
@@ -303,10 +327,14 @@ class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderSt
                       ]
                     )),
                     const SizedBox(height: 30),
-                    Text(
-                      errorMessage == '' ? '' : 'Hmmm ? $errorMessage',
-                      style: const TextStyle(
-                        color: Colors.red
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 50),
+                      child: Text(
+                        errorMessage == '' ? '' : 'ERROR: $errorMessage',
+                        textAlign: TextAlign.center,
+                        style: textStyle.copyWith(
+                          color: Colors.red,
+                        ),
                       ),
                     ),
                   ],

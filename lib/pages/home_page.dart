@@ -3,11 +3,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:thistle/authentication.dart';
 
 import '../appbar/appbar.dart';
+import 'auth_page.dart';
 
 class MyHomePage extends StatelessWidget {
-  MyHomePage({super.key, required this.title});
+  MyHomePage({
+    super.key,
+    required this.fullName
+  });
 
-  final String title;
+  final String fullName;
   final User? user = Auth().currentUser;
 
   Future<void> signOut() async {
@@ -33,12 +37,12 @@ class MyHomePage extends StatelessWidget {
     );
 
     return Scaffold(
-      appBar: ThistleAppbar(title: title),
+      appBar: const ThistleAppbar(title: 'Thistle Home'),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
-            Text('Hi, ${user?.email}' ?? 'User Email'),
+            Text('Hi, $fullName' ?? 'User Email'),
             const SizedBox(height: 30),
             ElevatedButton(
                 onPressed: signOut,
