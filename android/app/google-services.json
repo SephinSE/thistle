@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "542400573545",
+    "project_id": "gift-of-the-thistle",
+    "storage_bucket": "gift-of-the-thistle.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:542400573545:android:6c530d1aec4dc6a7ba32f8",
+        "android_client_info": {
+          "package_name": "com.thistle.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3BgVQwxXXwtSGKA4F9HzcmoeYBsDXOX0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:542400573545:android:45d5db8d7c6c2ac5ba32f8",
+        "android_client_info": {
+          "package_name": "com.thistle.thistle"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3BgVQwxXXwtSGKA4F9HzcmoeYBsDXOX0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
