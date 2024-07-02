@@ -4,9 +4,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../authentication.dart';
 import 'package:thistle/app_state.dart';
-import 'package:provider/provider.dart';
+import 'styles.dart';
 
 class ThistleAuthPage extends StatefulWidget {
   const ThistleAuthPage({super.key});
@@ -16,24 +15,33 @@ class ThistleAuthPage extends StatefulWidget {
 }
 
 class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderStateMixin {
-  String? errorMessage = '';
+  String? errorMessage = ApplicationState().errorMessage;
   bool isLogin = true;
 
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _controllerEmail = TextEditingController();
   final TextEditingController _controllerPassword = TextEditingController();
   final TextEditingController _controllerConfirmPassword = TextEditingController();
+  final TextEditingController _controllerFullName = TextEditingController();
   bool _isRegistering = false;
+  bool _isSigningIn = false;
 
   Future<void> signInWithEmailAndPassword() async {
+    setState(() {
+      _isSigningIn = true;
+    });
     try {
-      await Auth().signInWithEmailAndPassword(
+      await ApplicationState().signInWithEmailAndPassword(
         email: _controllerEmail.text,
         password: _controllerPassword.text,
       );
     } on FirebaseAuthException catch (e) {
       setState(() {
         errorMessage = e.message;
+      });
+    } finally {
+      setState(() {
+        _isSigningIn = false;
       });
     }
   }
@@ -43,9 +51,10 @@ class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderSt
       _isRegistering = true; // Disable button while registering
     });
     try {
-      await Auth().createUserWithEmailAndPassword(
+      await ApplicationState().createUserWithEmailAndPassword(
         email: _controllerEmail.text,
         password: _controllerPassword.text,
+        fullName: _controllerFullName.text,
       );
     } on FirebaseAuthException catch (e) {
       setState(() {
@@ -81,46 +90,23 @@ class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<ApplicationState>();
 
-    const textStyle = TextStyle(
-      fontFamily: 'Roboto Flex',
-      fontWeight: FontWeight.w400,
-      color: Color(0xFF3D2E5B),
-      fontSize: 17,
-    );
-    final formStyle = InputDecoration(
-      fillColor: const Color(0x3A1C102C),
-      filled: true,
-      hintStyle: textStyle.copyWith(
-        fontSize: 20,
-        color: const Color(0xB82B1A4E),
-      ),
-      floatingLabelStyle: textStyle.copyWith(
-        fontSize: 20,
-        color: const Color(0xB82B1A4E),
-        height: 100
-      ),
-      contentPadding: const EdgeInsets.symmetric(
-        vertical: 18,
-        horizontal: 24
-      ),
-      border: OutlineInputBorder(
-        borderSide: BorderSide.none,
-        borderRadius: BorderRadius.circular(22),
-      ),
-    );
-    final buttonStyle = ButtonStyle(
-      backgroundColor: WidgetStateProperty.all<Color>(const Color(0xFF2B1A4E)),
-      foregroundColor: WidgetStateProperty.all<Color>(Colors.white),
-      textStyle: WidgetStateProperty.all<TextStyle>(textStyle.copyWith(
-        fontSize: 19,
-      )),
-      padding: WidgetStateProperty.all(const EdgeInsets.all(14)),
-      shape: WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)))
-    );
+    final textStyle = AppStyles.textStyle;
+    final formStyle = AppStyles.formStyle;
+    final buttonStyle = AppStyles.buttonStyle;
+
     double screenWidth = MediaQuery.of(context).size.width;
     double padding = screenWidth > 450 ? 600 : 45;
+
+    Widget progressIndicator = const SizedBox(
+      height: 22,
+      width: 22,
+      child: Center(
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+        ),
+      ),
+    );
 
     return Scaffold(
       body: SafeArea(
@@ -221,7 +207,7 @@ class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderSt
                                       sigmaY: 8,
                                     ),
                                     child: TextFormField(
-                                      controller: appState.controllerFullName,
+                                      controller: _controllerFullName,
                                       decoration: formStyle.copyWith(hintText: 'full name'),
                                       style: textStyle.copyWith(
                                         fontSize: 20,
@@ -302,7 +288,7 @@ class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderSt
                                   }
                                 },
                                 style: buttonStyle,
-                                child: _isRegistering ? const CircularProgressIndicator() : Text(isLogin ? 'sign in' : 'register'),
+                                child: _isRegistering || _isSigningIn ? progressIndicator : Text(isLogin ? 'sign in' : 'register'),
                               ),
                             ),
                           ],
@@ -334,6 +320,7 @@ class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderSt
                         textAlign: TextAlign.center,
                         style: textStyle.copyWith(
                           color: Colors.red,
+                          fontSize: 14,
                         ),
                       ),
                     ),

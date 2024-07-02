@@ -6,7 +6,6 @@ import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 
 import 'app_state.dart';
-import 'authentication.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,7 +16,7 @@ Future<void> main() async {
   runApp(
     ChangeNotifierProvider(
       create: (context) => ApplicationState(), // Create your ChangeNotifier
-      child: const MyApp(),
+      builder: ((context, child) => const MyApp()),
     ),
   );
 }
