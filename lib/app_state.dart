@@ -83,7 +83,7 @@ class ApplicationState extends ChangeNotifier {
         email: email,
         password: password,
       );
-      await credential.user?.updateDisplayName(fullName);
+      await credential.user!.updateDisplayName(fullName);
     } on FirebaseAuthException catch (e) {
       errorMessage = e.message;
       notifyListeners();

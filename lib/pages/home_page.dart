@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
-
 import '../appbar/appbar.dart';
 import '../app_state.dart';
 import 'styles.dart';
 import 'guest_book.dart';
 
 class MyHomePage extends StatelessWidget {
-  MyHomePage({
+  const MyHomePage({
     super.key,
   });
-
-  final String? fullName = FirebaseAuth.instance.currentUser?.displayName;
-  final String? errorMessage = ApplicationState().errorMessage;
 
   @override
   Widget build(BuildContext context) {
     Widget progressIndicator = AppStyles().progressIndicator;
+    final String fullName = FirebaseAuth.instance.currentUser!.displayName ?? 'user';
 
     return Scaffold(
       appBar: const ThistleAppbar(title: 'Thistle Home'),
@@ -29,7 +26,10 @@ class MyHomePage extends StatelessWidget {
             children: <Widget>[
               Column(
                 children: [
-                  Text('Hi, $fullName', style: AppStyles.textStyle),
+                  Text(
+                    'Hi, $fullName',
+                    style: AppStyles.textStyle,
+                  ),
                   const SizedBox(height: 10),
                   Consumer<ApplicationState>(
                     builder: (context, appState, _) => Column(
