@@ -1,18 +1,15 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
-import 'pages/auth_page.dart';
-import 'pages/home_page.dart';
+import 'package:firebase_auth/firebase_auth.dart'
+    hide EmailAuthProvider, PhoneAuthProvider;
 import 'pages/guest_book_message.dart';
+
 
 class ApplicationState extends ChangeNotifier {
   ApplicationState() {
     init();
   }
-
 
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   User? get currentUser => _firebaseAuth.currentUser;
@@ -22,6 +19,9 @@ class ApplicationState extends ChangeNotifier {
 
   bool _loggedIn = false;
   bool get loggedIn => _loggedIn;
+
+  bool _isSigningOut = false;
+  bool get isSigningOut => _isSigningOut;
 
   StreamSubscription<QuerySnapshot>? _guestBookSubscription;
   List<GuestBookMessage> _guestBookMessages = [];
@@ -38,12 +38,19 @@ class ApplicationState extends ChangeNotifier {
             .listen((snapshot) {
           _guestBookMessages = [];
           for (final document in snapshot.docs) {
-            _guestBookMessages.add(
-              GuestBookMessage(
-                name: document.data()['name'] as String,
-                message: document.data()['text'] as String,
-              ),
-            );
+            final name = document.data()['name'] as String?;
+            final message = document.data()['text'] as String?;
+
+            if (name != null && message != null) {
+              _guestBookMessages.add(
+                GuestBookMessage(
+                  name: name,
+                  message: message,
+                ),
+              );
+            } else {
+              print('Warning: Null name or message encountered in Firestore document');
+            }
           }
           notifyListeners();
         });
@@ -84,7 +91,17 @@ class ApplicationState extends ChangeNotifier {
   }
 
   Future<void> signOut() async {
-    await _firebaseAuth.signOut();
+    _isSigningOut = true;
+    notifyListeners();
+    try {
+      await _firebaseAuth.signOut();
+    } on FirebaseAuthException catch (e) {
+      errorMessage = e.message;
+      notifyListeners();
+    } finally {
+      _isSigningOut = false;
+      notifyListeners();
+    }
   }
 
   Future<DocumentReference> addMessageToGuestBook(String message) {
@@ -101,25 +118,4 @@ class ApplicationState extends ChangeNotifier {
     });
   }
 
-}
-
-class AppWidget extends StatelessWidget {
-  const AppWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    var appState = Provider.of<ApplicationState>(context);
-
-    return StreamBuilder(
-      // stream: ApplicationState().authStateChanges,
-      stream: Provider.of<ApplicationState>(context, listen: false).authStateChanges,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return MyHomePage();
-        } else {
-          return const ThistleAuthPage();
-        }
-      },
-    );
-  }
 }

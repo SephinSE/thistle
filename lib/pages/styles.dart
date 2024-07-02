@@ -37,4 +37,15 @@ class AppStyles {
       padding: WidgetStateProperty.all(const EdgeInsets.all(14)),
       shape: WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)))
   );
+
+  Widget progressIndicator = const SizedBox(
+    height: 22,
+    width: 22,
+    child: Center(
+      child: CircularProgressIndicator(
+        strokeWidth: 2,
+        color: Colors.white,
+      ),
+    ),
+  );
 }

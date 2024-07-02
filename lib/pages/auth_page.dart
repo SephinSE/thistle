@@ -98,15 +98,7 @@ class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderSt
     double screenWidth = MediaQuery.of(context).size.width;
     double padding = screenWidth > 450 ? 600 : 45;
 
-    Widget progressIndicator = const SizedBox(
-      height: 22,
-      width: 22,
-      child: Center(
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-        ),
-      ),
-    );
+    Widget progressIndicator = AppStyles().progressIndicator;
 
     return Scaffold(
       body: SafeArea(
@@ -287,7 +279,7 @@ class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderSt
                                     isLogin ? signInWithEmailAndPassword() : createUserWithEmailAndPassword();
                                   }
                                 },
-                                style: buttonStyle,
+                                style: buttonStyle.copyWith(padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 20))),
                                 child: _isRegistering || _isSigningIn ? progressIndicator : Text(isLogin ? 'sign in' : 'register'),
                               ),
                             ),

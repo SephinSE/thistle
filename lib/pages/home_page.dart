@@ -13,13 +13,12 @@ class MyHomePage extends StatelessWidget {
   });
 
   final String? fullName = FirebaseAuth.instance.currentUser?.displayName;
-
-  Future<void> signOut() async {
-    await ApplicationState().signOut();
-  }
+  final String? errorMessage = ApplicationState().errorMessage;
 
   @override
   Widget build(BuildContext context) {
+    Widget progressIndicator = AppStyles().progressIndicator;
+
     return Scaffold(
       appBar: const ThistleAppbar(title: 'Thistle Home'),
       body: Center(
@@ -37,11 +36,11 @@ class MyHomePage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         if (appState.loggedIn) ...[
-                          Text('Leave a message [redacted]', style: AppStyles.textStyle),
+                          Text('Let\'s message niggas', style: AppStyles.textStyle),
                           const SizedBox(height: 20),
                           GuestBook(
                             addMessage: (message) =>
-                              appState.addMessageToGuestBook(message),
+                                appState.addMessageToGuestBook(message),
                             messages: appState.guestBookMessages,
                           ),
                         ],
@@ -51,9 +50,9 @@ class MyHomePage extends StatelessWidget {
                 ],
               ),
               ElevatedButton(
-                  onPressed: signOut,
-                  style: AppStyles.buttonStyle,
-                  child: const Text('sign out')
+                  onPressed: ApplicationState().signOut,
+                  style: AppStyles.buttonStyle.copyWith(padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 30, vertical: 15))),
+                  child: ApplicationState().isSigningOut ? progressIndicator : const Text('sign out')
               ),
             ],
           ),

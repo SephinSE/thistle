@@ -6,6 +6,8 @@ import 'firebase_options.dart';
 import 'package:provider/provider.dart';
 
 import 'app_state.dart';
+import 'pages/auth_page.dart';
+import 'pages/home_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,8 +15,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform
   );
-  runApp(
-    ChangeNotifierProvider(
+  runApp(ChangeNotifierProvider(
       create: (context) => ApplicationState(), // Create your ChangeNotifier
       builder: ((context, child) => const MyApp()),
     ),
@@ -38,7 +39,17 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
         useMaterial3: true,
       ),
-      home: const AppWidget(),
+      home: StreamBuilder(
+        // stream: ApplicationState().authStateChanges,
+        stream: Provider.of<ApplicationState>(context, listen: false).authStateChanges,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return MyHomePage();
+          } else {
+            return const ThistleAuthPage();
+          }
+        },
+      ),
     );
   }
 }
