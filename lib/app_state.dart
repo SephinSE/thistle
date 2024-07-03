@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'pages/auth_page.dart';
 import 'pages/home_page.dart';
 import 'pages/guest_book_message.dart';
+import 'pages/profile_page/user_profile.dart';
 
 class ApplicationState extends ChangeNotifier {
   ApplicationState() {
@@ -116,6 +117,7 @@ class AppWidget extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return MyHomePage();
+          // return ProfilePage();
         } else {
           return const ThistleAuthPage();
         }
