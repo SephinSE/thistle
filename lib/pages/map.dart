@@ -9,7 +9,7 @@ class ThistleMapPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       appBar: ThistleAppbar(title: 'Map',),
-      body: Center(child: Text('blank maps page'),),
+      body: Center(child: Text('map of area 51'),),
       bottomNavigationBar: ThistleNavBar(),
     );
   }

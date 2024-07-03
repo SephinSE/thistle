@@ -9,7 +9,7 @@ class ThistlePostPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       appBar: ThistleAppbar(title: 'Post',),
-      body: Center(child: Text('blank post page'),),
+      body: Center(child: Text('lol you\'re never gonna post'),),
       bottomNavigationBar: ThistleNavBar(),
     );
   }

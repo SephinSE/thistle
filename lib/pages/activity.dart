@@ -9,7 +9,7 @@ class ThistleActivityPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       appBar: ThistleAppbar(title: 'Activity',),
-      body: Center(child: Text('blank activity page'),),
+      body: Center(child: Text('you have zero friends why are you on this app'),),
       bottomNavigationBar: ThistleNavBar(),
     );
   }

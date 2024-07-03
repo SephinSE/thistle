@@ -23,11 +23,20 @@ class ApplicationState extends ChangeNotifier {
   bool _isSigningOut = false;
   bool get isSigningOut => _isSigningOut;
 
+  int _selectedIndex = 0;
+  int get selectedIndex => _selectedIndex;
+
+  void onNavBarTap(index) {
+    _selectedIndex = index;
+    notifyListeners();
+  }
+
   StreamSubscription<QuerySnapshot>? _guestBookSubscription;
   List<GuestBookMessage> _guestBookMessages = [];
   List<GuestBookMessage> get guestBookMessages => _guestBookMessages;
 
   Future<void> init() async {
+
     FirebaseAuth.instance.userChanges().listen((user) {
       if (user != null) {
         _loggedIn = true;
@@ -48,9 +57,10 @@ class ApplicationState extends ChangeNotifier {
                   message: message,
                 ),
               );
-            } else {
-              print('Warning: Null name or message encountered in Firestore document');
             }
+            // else {
+            //   print('Warning: Null name or message encountered in Firestore document');
+            // }
           }
           notifyListeners();
         });
@@ -92,6 +102,7 @@ class ApplicationState extends ChangeNotifier {
 
   Future<void> signOut() async {
     _isSigningOut = true;
+    _selectedIndex = 0;
     notifyListeners();
     try {
       await _firebaseAuth.signOut();
