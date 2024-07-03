@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
+
 import '../appbar/appbar.dart';
+import '../appbar/navbar.dart';
 import '../app_state.dart';
 import 'styles.dart';
-import 'guest_book.dart';
 
 class MyHomePage extends StatelessWidget {
   const MyHomePage({
@@ -17,7 +18,22 @@ class MyHomePage extends StatelessWidget {
     final String fullName = FirebaseAuth.instance.currentUser!.displayName ?? 'user';
 
     return Scaffold(
-      appBar: const ThistleAppbar(title: 'Thistle Home'),
+      appBar: ThistleAppbar(
+        title: 'Thistle Home',
+        actions: [
+          IconButton(
+            padding: const EdgeInsets.only(right: 20),
+            onPressed: () {
+              context.go('/chat');
+            },
+            icon: Icon(
+              Icons.chat,
+              color: AppStyles.thistleColor,
+              size: 30,
+            )
+          ),
+        ]
+      ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 60.0, horizontal: 10.0),
@@ -30,23 +46,6 @@ class MyHomePage extends StatelessWidget {
                     'Hi, $fullName',
                     style: AppStyles.textStyle,
                   ),
-                  const SizedBox(height: 10),
-                  Consumer<ApplicationState>(
-                    builder: (context, appState, _) => Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        if (appState.loggedIn) ...[
-                          Text('Let\'s message niggas', style: AppStyles.textStyle),
-                          const SizedBox(height: 20),
-                          GuestBook(
-                            addMessage: (message) =>
-                                appState.addMessageToGuestBook(message),
-                            messages: appState.guestBookMessages,
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
                 ],
               ),
               ElevatedButton(
@@ -58,6 +57,7 @@ class MyHomePage extends StatelessWidget {
           ),
         ),
       ),
+      bottomNavigationBar: const ThistleNavBar(),
     );
   }
 }

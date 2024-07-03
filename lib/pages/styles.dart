@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
 class AppStyles {
-  static TextStyle textStyle = const TextStyle(
+  static Color thistleColor = const Color(0xFF3D2E5B);
+  static Color onThistleColor = const Color(0xFFC5C7FF);
+
+  static TextStyle textStyle = TextStyle(
     fontFamily: 'Roboto Flex',
     fontWeight: FontWeight.w400,
-    color: Color(0xFF3D2E5B),
+    color: thistleColor,
     fontSize: 17,
   );
   static InputDecoration formStyle = InputDecoration(
