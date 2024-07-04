@@ -129,4 +129,14 @@ class ApplicationState extends ChangeNotifier {
     });
   }
 
+  Future<void> updateUserProfile(String imageUrl) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final currentDisplayName = user.displayName;
+      await user.updateProfile(photoURL: imageUrl, displayName: currentDisplayName);
+    }
+    notifyListeners(); // Now called after update is complete
+  }
+
+
 }

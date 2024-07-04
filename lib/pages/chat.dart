@@ -20,19 +20,21 @@ class ChatRoomPage extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Consumer<ApplicationState>(
-            builder: (context, appState, _) => Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                if (appState.loggedIn) ...[
-                  Text('Let\'s message niggas', style: AppStyles.textStyle),
-                  const SizedBox(height: 20),
-                  GuestBook(
-                    addMessage: (message) =>
-                        appState.addMessageToGuestBook(message),
-                    messages: appState.guestBookMessages,
-                  ),
+            builder: (context, appState, _) => SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  if (appState.loggedIn) ...[
+                    Text('Let\'s message niggas', style: AppStyles.textStyle),
+                    const SizedBox(height: 20),
+                    GuestBook(
+                      addMessage: (message) =>
+                          appState.addMessageToGuestBook(message),
+                      messages: appState.guestBookMessages,
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),

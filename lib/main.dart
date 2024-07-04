@@ -15,6 +15,7 @@ import 'pages/map.dart';
 import 'pages/post.dart';
 import 'pages/activity.dart';
 import 'pages/profile.dart';
+import 'pages/edit_profile.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -74,7 +75,15 @@ final GoRouter _router = GoRouter(
           path: 'profile',
           builder: (context, state) {
             return const ThistleProfilePage();
-          }
+          },
+          routes: [
+            GoRoute(
+              path: 'edit_profile',
+              builder: (context, state) {
+                return const ThistleEditProfilePage();
+              }
+            )
+          ]
         ),
       ]
     )
