@@ -94,7 +94,7 @@ class ThistleProfilePage extends StatelessWidget {
                   final imageUrl = await uploadImage(croppedXFile);
                   await Provider.of<ApplicationState>(context, listen: false).updateUserProfile(imageUrl);
                   // Show success message or update UI (optional)
-                                }
+                }
               },
               style: AppStyles.buttonStyle.copyWith(padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 20, horizontal: 20))),
               child: Text(
