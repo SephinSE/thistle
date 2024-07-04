@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
@@ -18,9 +19,9 @@ class ThistleProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-    String username = user!.email!.split('@')[0];
-    String fullName = user.displayName.toString();
-    String? photoURL = user.photoURL;
+    final userRef = FirebaseFirestore.instance.collection('users').doc(user!.uid);
+    String username = user.email!.split('@')[0];
+    String fullName = '';
 
     void navigateToEditProfile() {
       Navigator.push(
@@ -39,33 +40,15 @@ class ThistleProfilePage extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Consumer<ApplicationState>(
-            //   builder: (context, state, _) {
-            //     if (photoURL != null) {
-            //       return ClipRRect(
-            //         borderRadius: BorderRadius.circular(75),
-            //         child: Image.network(
-            //           photoURL,
-            //           width: 150,
-            //           height: 150,
-            //           fit: BoxFit.cover,
-            //         ),
-            //       );
-            //     } else {
-            //       return const Icon(Icons.person, size: 100);
-            //     }
-            //   },
-            // ),
-            FutureBuilder<User?>(
-              future: Provider.of<ApplicationState>(context).authStateChanges.first,
+            StreamBuilder<DocumentSnapshot>(
+              stream: userRef.snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
-                  print(snapshot.error);
-                  return const Text('Error loading user data'); // Handle errors
+                  return Text('Error: ${snapshot.error}');
                 }
                 if (snapshot.hasData) {
-                  final user = snapshot.data!;
-                  final photoURL = user.photoURL;
+                  final userData = snapshot.data!.data() as Map<String, dynamic>;
+                  final photoURL = userData['photoURL'];
                   if (photoURL != null) {
                     return ClipRRect(
                       borderRadius: BorderRadius.circular(75),
@@ -77,11 +60,18 @@ class ThistleProfilePage extends StatelessWidget {
                       ),
                     );
                   } else {
-                    return const Icon(Icons.person, size: 100); // Default icon for no photoURL
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(75),
+                      child: Image.asset(
+                        'assets/default.png',
+                        width: 150,
+                        height: 150,
+                        fit: BoxFit.cover,
+                      ),
+                    );
                   }
                 }
-                // Display loading indicator while user data is being fetched
-                return const CircularProgressIndicator(color: Colors.black,);
+                return const SizedBox(height: 150, child: Center(child: CircularProgressIndicator(color: Colors.black)));
               },
             ),
             const SizedBox(height: 20),
@@ -89,23 +79,35 @@ class ThistleProfilePage extends StatelessWidget {
               onPressed: () async {
                 final image = await pickImage(context);
                 if (image != null) {
-                  final croppedImage = await cropImage(image);
+                  final croppedImage = await cropImage(image, context);
                   final croppedXFile = XFile(croppedImage!.path);
                   final imageUrl = await uploadImage(croppedXFile);
                   await Provider.of<ApplicationState>(context, listen: false).updateUserProfile(imageUrl);
-                  // Show success message or update UI (optional)
                 }
               },
               style: AppStyles.buttonStyle.copyWith(padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 20, horizontal: 20))),
               child: Text(
-                photoURL!= null ? 'Change Profile Picture' : 'Upload Profile Picture',
+                'Change Profile Picture',
                 style: AppStyles.textStyle.copyWith(
                   color: Colors.white
                 ),
               ),
             ),
             const SizedBox(height: 30),
-            Text('Welcome, $fullName!', style: AppStyles.textStyle,),
+            StreamBuilder<DocumentSnapshot>(
+              stream: userRef.snapshots(),
+              builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot<Object?>> snapshot) {
+                if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                }
+                if (!snapshot.hasData) {
+                  return const Text('Welcome, user!');
+                }
+                final userData = snapshot.data!.data() as Map<String, dynamic>;
+                fullName = userData['displayName'];
+                return Text('Welcome, $fullName!', style: AppStyles.textStyle);
+              },
+            ),
           ],
         ),
       ),

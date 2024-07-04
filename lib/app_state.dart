@@ -93,7 +93,20 @@ class ApplicationState extends ChangeNotifier {
         email: email,
         password: password,
       );
+      final uid = credential.user!.uid;
+      final userData = {
+        'email' : email,
+        'displayName' : fullName,
+        'uid' : credential.user!.uid,
+        'username' : credential.user!.email!.split('@')[0],
+        'timestamp' : DateTime.now().millisecondsSinceEpoch,
+      };
       await credential.user!.updateDisplayName(fullName);
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .set(userData)
+          .onError((e, _) => print("Error writing document: $e"));
     } on FirebaseAuthException catch (e) {
       errorMessage = e.message;
       notifyListeners();
@@ -132,8 +145,12 @@ class ApplicationState extends ChangeNotifier {
   Future<void> updateUserProfile(String imageUrl) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      final currentDisplayName = user.displayName;
-      await user.updateProfile(photoURL: imageUrl, displayName: currentDisplayName);
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .set(<String, String>{
+            'photoURL' : imageUrl
+      }, SetOptions(merge: true));
     }
     notifyListeners(); // Now called after update is complete
   }
