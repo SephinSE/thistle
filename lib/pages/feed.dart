@@ -259,47 +259,57 @@ class _ThistleFeedPageState extends State<ThistleFeedPage> {
                   ),
                   const SizedBox(height: 14),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: <Widget>[
+
+                    children: [
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: <Widget>[
-                          IconButton(
-                            icon: Icon(
-                              isLiked ? Icons.favorite : Icons.favorite_border,
-                              color: isLiked ? likeColor : Colors.grey,
-                            ),
-                            onPressed: () => _toggleLike(_posts[index]),
+                          Row(
+                            children: <Widget>[
+                              IconButton(
+                                icon: Icon(
+                                  isLiked ? Icons.favorite : Icons.favorite_border,
+                                  color: isLiked ? likeColor : Colors.grey,
+                                ),
+                                onPressed: () => _toggleLike(_posts[index]),
+                              ),
+                              const SizedBox(width: 0),
+                              // Text(
+                              //   "$likes",
+                              //   style: const TextStyle(color: Colors.grey),
+                              // ),
+                            ],
                           ),
-                          const SizedBox(width: 0.5),
-                          Text(
-                            "$likes",
-                            style: const TextStyle(color: Colors.grey),
+                          Row(
+                            children: <Widget>[
+                              IconButton(
+                                icon: const Icon(Icons.comment, color: Colors.grey),
+                                onPressed: () => _showComments(_posts[index]),
+                              ),
+                              const SizedBox(width: 10),
+                              // const Text(
+                              //   "Comment",
+                              //   style: TextStyle(color: Colors.grey),
+                              // ),
+                            ],
+                          ),
+                           Row(
+                            children: <Widget>[
+                              // Icon(Icons.share, color: Colors.grey),
+                              Container(width: 24,height: 24,child: const ImageIcon(AssetImage('assets/thistleLOGO.png'),),),
+                              SizedBox(width: 0),
+                              // Text(
+                              //   "Connect",
+                              //   style: TextStyle(color: Colors.grey),
+                              // ),
+                            ],
                           ),
                         ],
-                      ),
-                      Row(
-                        children: <Widget>[
-                          IconButton(
-                            icon: const Icon(Icons.comment, color: Colors.grey),
-                            onPressed: () => _showComments(_posts[index]),
-                          ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            "Comment",
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                      const Row(
-                        children: <Widget>[
-                          Icon(Icons.share, color: Colors.grey),
-                          SizedBox(width: 8),
-                          Text(
-                            "Share",
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        ],
-                      ),
+                      ),SizedBox(width: 180,),
+          Text(
+            "$likes",
+            style: const TextStyle(color: Colors.grey),
+          ), SizedBox(width: 10,),Text( likes > 1 ? "Likes" : "Like"),
                     ],
                   ),
                   const SizedBox(height: 12.0),
