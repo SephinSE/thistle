@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:thistle/appbar/appbar.dart';
 import 'package:thistle/appbar/navbar.dart';
 import 'styles.dart';
-
+import 'package:thistle/pages/1to1chat.dart';
 class ThistleFeedPage extends StatefulWidget {
   const ThistleFeedPage({super.key});
 
@@ -296,7 +296,21 @@ class _ThistleFeedPageState extends State<ThistleFeedPage> {
                            Row(
                             children: <Widget>[
                               // Icon(Icons.share, color: Colors.grey),
-                              Container(width: 24,height: 24,child: const ImageIcon(AssetImage('assets/thistleLOGO.png'),),),
+                              Container(width: 48,height: 48,child:  IconButton(
+                                icon: Container(
+                                  width: 24,
+                                  height: 24,
+                                  child: ImageIcon(AssetImage('assets/thistleLOGO.png')),
+                                ),
+                                onPressed: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => ChatPage(userId: _posts[index]['userId'], postId: _posts[index].id),
+                                    ),
+                                  );
+                                },
+                              ),
+                              ),
                               SizedBox(width: 0),
                               // Text(
                               //   "Connect",
@@ -305,7 +319,7 @@ class _ThistleFeedPageState extends State<ThistleFeedPage> {
                             ],
                           ),
                         ],
-                      ),SizedBox(width: 180,),
+                      ),SizedBox(width: 175,),
           Text(
             "$likes",
             style: const TextStyle(color: Colors.grey),
