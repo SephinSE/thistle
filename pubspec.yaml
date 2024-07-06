@@ -45,6 +45,7 @@ dependencies:
   image_picker: ^1.1.2
   image_cropper: ^7.1.0
   firebase_storage: ^12.1.0
+  google_maps_flutter: ^2.7.0
 
 dev_dependencies:
   flutter_test:
@@ -72,7 +73,15 @@ flutter:
   assets:
      - assets/authBG.svg
      - assets/thistleLOGO.svg
+     - assets/thistleLOGO.png
      - assets/default.png
+     - assets/thistleMapTheme/night_theme.json
+     - assets/thistleMapTheme/dark_theme.json
+     - assets/thistleMapTheme/aubergine_theme.json
+     - assets/thistleMapTheme/retro_theme.json
+     - assets/thistleMapTheme/silver_theme.json
+
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
