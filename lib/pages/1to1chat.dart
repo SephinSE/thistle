@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_swipe_button/flutter_swipe_button.dart';
 
 class ChatPage extends StatefulWidget {
   final String userId;
@@ -24,17 +25,43 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController _messageController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late CollectionReference<Map<String, dynamic>> _messagesCollection;
+  late DocumentReference<Map<String, dynamic>> _chatDoc;
   late String _currentUserId;
+  Color _buttonColor = Colors.red;
 
   @override
   void initState() {
     super.initState();
     _currentUserId = FirebaseAuth.instance.currentUser!.uid;
     _messagesCollection = _firestore.collection('chats').doc(widget.chatRoomId).collection('messages');
+    _chatDoc = _firestore.collection('chats').doc(widget.chatRoomId);
 
     if (widget.initialMessage != null && widget.initialMessage!.isNotEmpty) {
       _sendMessage(widget.initialMessage!);
     }
+
+    // Ensure initial swipe state is set in Firestore
+    _chatDoc.get().then((snapshot) {
+      if (!snapshot.exists) {
+        _chatDoc.set({
+          'swipeState': {
+            widget.userId: 0,
+            _currentUserId: 0,
+          }
+        });
+      } else {
+        final swipeState = snapshot.data()?['swipeState'] ?? {};
+        _updateButtonColor(swipeState);
+      }
+    });
+
+    // Listen to changes in swipe state
+    _chatDoc.snapshots().listen((snapshot) {
+      if (snapshot.exists) {
+        final swipeState = snapshot.data()!['swipeState'] ?? {};
+        _updateButtonColor(swipeState);
+      }
+    });
   }
 
   Future<void> _sendMessage(String message) async {
@@ -47,6 +74,45 @@ class _ChatPageState extends State<ChatPage> {
     });
 
     _messageController.clear();
+  }
+
+  void _updateButtonColor(Map<String, dynamic> swipeState) {
+    if (swipeState.isNotEmpty) {
+      if (swipeState[widget.userId] == 1 && swipeState[_currentUserId] == 1) {
+        setState(() {
+          _buttonColor = Colors.green;
+        });
+      } else if (swipeState[widget.userId] != 1 && swipeState[_currentUserId] == 1) {
+        setState(() {
+          _buttonColor = Colors.deepPurple;
+        });
+
+      }
+      else if (swipeState[widget.userId] == 1 && swipeState[_currentUserId] != 1) {
+        setState(() {
+          _buttonColor = Colors.deepPurple;
+        });
+
+      }
+      else {
+        setState(() {
+          _buttonColor = Colors.red;
+        });
+      }
+    }
+  }
+
+  Future<void> _onSwipe() async {
+    await _chatDoc.update({
+      'swipeState.${_currentUserId}': 1,
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Swiped"),
+        backgroundColor: Colors.green,
+      ),
+    );
   }
 
   @override
@@ -90,6 +156,21 @@ class _ChatPageState extends State<ChatPage> {
                 );
               },
             ),
+          ),
+          SwipeButton.expand(
+            thumb: Icon(
+              Icons.double_arrow_rounded,
+              color: Colors.white,
+            ),
+            child: Text(
+              "Swipe to ...",
+              style: TextStyle(
+                color: Colors.black,
+              ),
+            ),
+            activeThumbColor: _buttonColor,
+            activeTrackColor: Colors.grey.shade300,
+            onSwipe: _onSwipe,
           ),
           Padding(
             padding: EdgeInsets.all(8),

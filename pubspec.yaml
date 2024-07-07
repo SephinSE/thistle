@@ -46,7 +46,7 @@ dependencies:
   image_cropper: ^7.1.0
   firebase_storage: ^12.1.0
   google_maps_flutter: ^2.7.0
-
+  flutter_swipe_button: ^2.1.1+1
 dev_dependencies:
   flutter_test:
     sdk: flutter

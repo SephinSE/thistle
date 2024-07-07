@@ -338,6 +338,10 @@ class _ThistleFeedPageState extends State<ThistleFeedPage> {
                                         'participants': [currentUser.uid, userId],
                                         'lastMessage': postText,
                                         'timestamp': FieldValue.serverTimestamp(),
+                                        'swipestate': {
+                                          currentUser.uid: 0,
+                                          userId: 0,
+                                        },
                                       });
                                     }
 
