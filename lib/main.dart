@@ -16,7 +16,7 @@ import 'pages/post.dart';
 import 'pages/activity.dart';
 import 'pages/profile.dart';
 import 'pages/edit_profile.dart';
-
+import 'pages/chatList.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //GoogleFonts.config.allowRuntimeFetching = false;
@@ -24,70 +24,75 @@ Future<void> main() async {
       options: DefaultFirebaseOptions.currentPlatform
   );
   runApp(ChangeNotifierProvider(
-      create: (context) => ApplicationState(), // Create your ChangeNotifier
-      builder: ((context, child) => const MyApp()),
-    ),
+    create: (context) => ApplicationState(), // Create your ChangeNotifier
+    builder: ((context, child) => const MyApp()),
+  ),
   );
 }
 
 final GoRouter _router = GoRouter(
-  routes: [
-    GoRoute(
-      path: '/',
-      builder: (context, state) {
-        return StreamBuilder(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return const MyHomePage();
-            } else {
-              return const ThistleAuthPage();
-            }
-          },
-        );
-      },
-      routes: [
-        GoRoute(
-          path: 'chat',
+    routes: [
+      GoRoute(
+          path: '/',
           builder: (context, state) {
-            return const ChatRoomPage();
-          }
-        ),
-        GoRoute(
-          path: 'map',
-          builder: (context, state) {
-            return const ThistleMapPage();
-          }
-        ),
-        GoRoute(
-          path: 'post',
-          builder: (context, state) {
-            return const ThistlePostPage();
-          }
-        ),
-        GoRoute(
-          path: 'activity',
-          builder: (context, state) {
-            return const ThistleActivityPage();
-          }
-        ),
-        GoRoute(
-          path: 'profile',
-          builder: (context, state) {
-            return const ThistleProfilePage();
+            return StreamBuilder(
+              stream: FirebaseAuth.instance.authStateChanges(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return const MyHomePage();
+                } else {
+                  return const ThistleAuthPage();
+                }
+              },
+            );
           },
           routes: [
             GoRoute(
-              path: 'edit_profile',
-              builder: (context, state) {
-                return const ThistleEditProfilePage();
-              }
-            )
+                path: 'chat',
+                builder: (context, state) {
+                  return const ChatRoomPage();
+                }
+            ),GoRoute(
+                path: 'chatList',
+                builder: (context, state) {
+                  return PersonalChatsPage();
+                }
+            ),
+            GoRoute(
+                path: 'map',
+                builder: (context, state) {
+                  return const ThistleMapPage();
+                }
+            ),
+            GoRoute(
+                path: 'post',
+                builder: (context, state) {
+                  return const ThistlePostPage();
+                }
+            ),
+            GoRoute(
+                path: 'activity',
+                builder: (context, state) {
+                  return const ThistleActivityPage();
+                }
+            ),
+            GoRoute(
+                path: 'profile',
+                builder: (context, state) {
+                  return const ThistleProfilePage();
+                },
+                routes: [
+                  GoRoute(
+                      path: 'edit_profile',
+                      builder: (context, state) {
+                        return const ThistleEditProfilePage();
+                      }
+                  )
+                ]
+            ),
           ]
-        ),
-      ]
-    )
-  ]
+      )
+    ]
 );
 
 class MyApp extends StatelessWidget {
