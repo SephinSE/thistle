@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'styles.dart';
-import 'guest_book_message.dart';
+import '../classes/guest_book_message.dart';
 
 class GuestBook extends StatefulWidget {
   const GuestBook({
@@ -29,6 +29,9 @@ class _GuestBookState extends State<GuestBook> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        for (var message in widget.messages)
+          Text('${message.name}: ${message.message}'),
+        const SizedBox(height: 8),
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Form(
@@ -70,10 +73,6 @@ class _GuestBookState extends State<GuestBook> {
             ),
           ),
         ),
-        const SizedBox(height: 8),
-        for (var message in widget.messages)
-          Text('${message.name}: ${message.message}'),
-        const SizedBox(height: 8),
       ],
     );
   }

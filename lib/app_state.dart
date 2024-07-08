@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart'
     hide EmailAuthProvider, PhoneAuthProvider;
-import 'pages/guest_book_message.dart';
-
+import 'classes/guest_book_message.dart';
+import 'classes/user_profile_class.dart';
+import 'functions/get_department.dart';
 
 class ApplicationState extends ChangeNotifier {
   ApplicationState() {
@@ -35,6 +36,15 @@ class ApplicationState extends ChangeNotifier {
   List<GuestBookMessage> _guestBookMessages = [];
   List<GuestBookMessage> get guestBookMessages => _guestBookMessages;
 
+  StreamSubscription<DocumentSnapshot>? _userSubscription;
+  UserProfileClass? _userProfile;
+  UserProfileClass? get userProfile => _userProfile;
+
+  void updateUserProfileClass(UserProfileClass newProfile) {
+    _userProfile = newProfile;
+    notifyListeners();
+  }
+
   Future<void> init() async {
 
     FirebaseAuth.instance.userChanges().listen((user) {
@@ -58,16 +68,47 @@ class ApplicationState extends ChangeNotifier {
                 ),
               );
             }
-            // else {
-            //   print('Warning: Null name or message encountered in Firestore document');
-            // }
           }
           notifyListeners();
         });
+
+        _userSubscription = FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .snapshots()
+            .listen((snapshot) {
+          final userData = snapshot.data() as Map<String, dynamic>;
+          final username = userData['username'];
+          final photoURL = userData['photoURL'];
+          final friendsCount = userData['friendsCount'];
+          final thistleCount = userData['thistleCount'];
+          final fullName = userData['displayName'];
+          final departmentID = userData['departmentID'];
+          final department = getDepartment(departmentID);
+          final bio = userData['bio'];
+
+          if (friendsCount != null && thistleCount != null && fullName != null && departmentID != null && bio != null) {
+            updateUserProfileClass(
+                UserProfileClass(
+                    username: username,
+                    photoURL: photoURL,
+                    friendsCount: friendsCount,
+                    thistleCount: thistleCount,
+                    fullName: fullName,
+                    department: department,
+                    departmentID: departmentID,
+                    bio: bio
+                )
+            );
+            notifyListeners();
+          }
+        });
+
       } else {
         _loggedIn = false;
         _guestBookMessages = [];
         _guestBookSubscription?.cancel();
+        _userSubscription?.cancel();
       }
       notifyListeners();
     });
@@ -100,6 +141,11 @@ class ApplicationState extends ChangeNotifier {
         'uid' : credential.user!.uid,
         'username' : credential.user!.email!.split('@')[0],
         'timestamp' : DateTime.now().millisecondsSinceEpoch,
+        'bio' : '',
+        'friendsCount' : 0,
+        'thistleCount' : 0,
+        'departmentID' : 0,
+        'photoURL' : 'https://firebasestorage.googleapis.com/v0/b/gift-of-the-thistle.appspot.com/o/profile_pictures%2Fdefault.png?alt=media&token=cf7e3d32-010e-488f-ba01-783aff1576f8',
       };
       await credential.user!.updateDisplayName(fullName);
       FirebaseFirestore.instance

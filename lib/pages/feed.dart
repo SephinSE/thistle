@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:thistle/appbar/appbar.dart';
 import 'package:thistle/appbar/navbar.dart';
-import 'package:thistle/pages/chat.dart';
 import 'package:thistle/pages/styles.dart';
 import 'package:thistle/pages/1to1chat.dart';
-import 'package:thistle/pages/chatList.dart';
 
 
 class ThistleFeedPage extends StatefulWidget {
@@ -62,14 +61,16 @@ class _ThistleFeedPageState extends State<ThistleFeedPage> {
       for (var doc in querySnapshot.docs) {
         final userId = doc['userId'];
         if (!_userProfilePics.containsKey(userId)) {
-          final userDoc =
-          await _firestore.collection('users').doc(userId).get();
+          final userDoc = await _firestore.collection('users').doc(userId).get();
           if (userDoc.exists) {
-            _userProfilePics[userId] =
-                userDoc['photoURL'] ?? 'https://example.com/default_profile_pic.png';
+            // Check if 'photoURL' field exists in the userDoc
+            if (userDoc.data()!.containsKey('photoURL')) {
+              _userProfilePics[userId] = userDoc['photoURL'];
+            } else {
+              _userProfilePics[userId] = 'https://example.com/default_profile_pic.png';
+            }
           } else {
-            _userProfilePics[userId] =
-            'https://example.com/default_profile_pic.png';
+            _userProfilePics[userId] = 'https://example.com/default_profile_pic.png';
             print("User document for userId $userId does not exist.");
           }
         }
@@ -85,6 +86,7 @@ class _ThistleFeedPageState extends State<ThistleFeedPage> {
       _isLoading = false;
     });
   }
+
 
   void _scrollListener() {
     if (_scrollController.position.pixels ==
@@ -204,8 +206,8 @@ class _ThistleFeedPageState extends State<ThistleFeedPage> {
 
   String _generateChatRoomId(String userId1, String userId2) {
     return userId1.hashCode <= userId2.hashCode
-        ? '$userId1\_$userId2'
-        : '$userId2\_$userId1';
+        ? '${userId1}_$userId2'
+        : '${userId2}_$userId1';
   }
 
   @override
@@ -218,19 +220,8 @@ class _ThistleFeedPageState extends State<ThistleFeedPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: ThistleAppbar(
+      appBar: const ThistleAppbar(
         title: 'Feed',
-        actions: [
-          IconButton(
-            padding: const EdgeInsets.only(right: 20),
-            onPressed: () => _scaffoldKey.currentState!.openDrawer(),
-            icon: Icon(
-              Icons.menu,
-              color: AppStyles.thistleColor,
-              size: 30,
-            ),
-          ),
-        ],
       ),
       body: _isLoading && _posts.isEmpty
           ? const Center(child: CircularProgressIndicator())
@@ -269,112 +260,8 @@ class _ThistleFeedPageState extends State<ThistleFeedPage> {
                       backgroundImage: NetworkImage(profilePicUrl),
                     ),
                     title: Text(userName),
-                    subtitle: Text(timestamp.toString()),
+                    subtitle: Text(DateFormat('dd MMMM yyyy, HH:mm').format(timestamp)),
                   ),
-                  Container(
-                    height: 200,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: NetworkImage(imageUrl),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  Row(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Row(
-                            children: <Widget>[
-                              IconButton(
-                                icon: Icon(
-                                  isLiked
-                                      ? Icons.favorite
-                                      : Icons.favorite_border,
-                                  color: isLiked ? likeColor : Colors.grey,
-                                ),
-                                onPressed: () =>
-                                    _toggleLike(_posts[index]),
-                              ),
-                              const SizedBox(width: 0),
-                            ],
-                          ),
-                          Row(
-                            children: <Widget>[
-                              IconButton(
-                                icon:
-                                const Icon(Icons.comment, color: Colors.grey),
-                                onPressed: () => _showComments(_posts[index]),
-                              ),
-                              const SizedBox(width: 10),
-                            ],
-                          ),
-                          Row(
-                            children: <Widget>[
-                              Container(
-                                width: 48,
-                                height: 48,
-                                child: IconButton(
-                                  icon: Container(
-                                    width: 24,
-                                    height: 24,
-                                    child: ImageIcon(
-                                        AssetImage('assets/thistleLOGO.png')),
-                                  ),
-                                  onPressed: () async {
-                                    // Navigate to ChatPage with boilerplate message
-                                    final chatRoomId = _generateChatRoomId(currentUser!.uid, userId);
-                                    final postText = "Hey $userName, I'm interested in your post: \"$caption\". Let's chat!";
-
-                                    // Check if chat room already exists
-                                    final chatRoomRef = _firestore.collection('chats').doc(chatRoomId);
-                                    final chatRoomDoc = await chatRoomRef.get();
-
-                                    if (!chatRoomDoc.exists) {
-                                      // Create a new chat room document
-                                      await chatRoomRef.set({
-                                        'participants': [currentUser.uid, userId],
-                                        'lastMessage': postText,
-                                        'timestamp': FieldValue.serverTimestamp(),
-                                        'swipestate': {
-                                          currentUser.uid: 0,
-                                          userId: 0,
-                                        },
-                                      });
-                                    }
-
-                                    // Navigate to ChatPage
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) => ChatPage(
-                                          userId: userId,
-                                          postId: _posts[index].id,
-                                          chatRoomId: chatRoomId,
-                                          initialMessage: postText,
-                                        ),
-                                      ),
-                                    );
-                                  },
-
-                                ),
-                              ),
-                              const SizedBox(width: 0),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(width: 175),
-                      Text(
-                        "$likes",
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(likes > 1 ? "Likes" : "Like"),
-                    ],
-                  ),
-                  const SizedBox(height: 12.0),
                   if (caption.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -387,6 +274,99 @@ class _ThistleFeedPageState extends State<ThistleFeedPage> {
                       ),
                     ),
                   const SizedBox(height: 12.0),
+                  Container(
+                    height: 200,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: NetworkImage(imageUrl),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              isLiked
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: isLiked ? likeColor : Colors.grey,
+                            ),
+                            onPressed: () =>
+                                _toggleLike(_posts[index]),
+                          ),
+                          IconButton(
+                            icon:
+                            const Icon(Icons.comment, color: Colors.grey),
+                            onPressed: () => _showComments(_posts[index]),
+                          ),
+                          SizedBox(
+                            width: 48,
+                            height: 48,
+                            child: IconButton(
+                              icon: const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: ImageIcon(
+                                    AssetImage('assets/thistleLOGOlight.png')),
+                              ),
+                              onPressed: () async {
+                                // Navigate to ChatPage with boilerplate message
+                                final chatRoomId = _generateChatRoomId(currentUser!.uid, userId);
+                                final postText = "Hey $userName, I'm interested in your post: \"$caption\". Let's chat!";
+
+                                // Check if chat room already exists
+                                final chatRoomRef = _firestore.collection('chats').doc(chatRoomId);
+                                final chatRoomDoc = await chatRoomRef.get();
+
+                                if (!chatRoomDoc.exists) {
+                                  // Create a new chat room document
+                                  await chatRoomRef.set({
+                                    'participants': [currentUser.uid, userId],
+                                    'lastMessage': postText,
+                                    'timestamp': FieldValue.serverTimestamp(),
+                                    'swipestate': {
+                                      currentUser.uid: 0,
+                                      userId: 0,
+                                    },
+                                  });
+                                }
+
+                                // Navigate to ChatPage
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => ChatPage(
+                                      userId: userId,
+                                      postId: _posts[index].id,
+                                      chatRoomId: chatRoomId,
+                                      initialMessage: postText,
+                                    ),
+                                  ),
+                                );
+                              },
+
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            "$likes",
+                            style: const TextStyle(color: Colors.grey),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(likes > 1 ? "Likes" : "Like"),
+                          const SizedBox(width: 15),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20.0),
                 ],
               ),
             ),
@@ -400,24 +380,25 @@ class _ThistleFeedPageState extends State<ThistleFeedPage> {
           children: <Widget>[
             DrawerHeader(
               decoration: BoxDecoration(
-                color: Color(0xFFC5C7FF),
+                color: AppStyles.onThistleColor,
               ),
               child: Text(
                 'Communication',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppStyles.thistleColor,
                   fontSize: 24,
+                  fontWeight: FontWeight.w600
                 ),
               ),
             ),
             ListTile(
-              title: Text('CHAT ROOM'),
+              title: const Text('CUSAT Forum', style: TextStyle(fontSize: 18)),
               onTap: () {
                 context.go('/chat');
               },
             ),
             ListTile(
-              title: Text('PERSONAL CHATS'),
+              title: const Text('Personal chats', style: TextStyle(fontSize: 18)),
               onTap: () {
                 context.go('/chatList'); // Navigate to the personal chat page
               },

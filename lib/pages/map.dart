@@ -8,6 +8,9 @@ import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:thistle/app_state.dart';
+import 'package:thistle/appbar/appbar.dart';
+
+import '../appbar/navbar.dart';
 
 class ThistleMapPage extends StatefulWidget {
   const ThistleMapPage({super.key});
@@ -144,9 +147,8 @@ class _ThistleMapPageState extends State<ThistleMapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Thistle Events Map', style: TextStyle(fontFamily: 'Montserrat')),
-        backgroundColor: Color(0xFFC5C7FF),
+      appBar: ThistleAppbar(
+        title: 'Events Map',
         actions: [
           PopupMenuButton<String>(
             color: Color(0xFFD1D3FF),
@@ -161,12 +163,6 @@ class _ThistleMapPageState extends State<ThistleMapPage> {
             onSelected: _setMapStyle,
           ),
         ],
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Provider.of<ApplicationState>(context, listen: false).onNavBarTap(0);
-          },
-        ),
       ),
       body: SafeArea(
         child: GoogleMap(
@@ -181,6 +177,7 @@ class _ThistleMapPageState extends State<ThistleMapPage> {
           onTap: (LatLng position) => addMarker(position),
         ),
       ),
+      bottomNavigationBar: const ThistleNavBar(),
     );
   }
 }

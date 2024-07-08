@@ -37,7 +37,11 @@ class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderSt
       );
     } on FirebaseAuthException catch (e) {
       setState(() {
-        errorMessage = e.message;
+        if (e.code == 'invalid-credential') {
+          errorMessage = 'Incorrect password!';
+        } else {
+          errorMessage = e.message;
+        }
       });
     } finally {
       setState(() {
@@ -58,7 +62,12 @@ class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderSt
       );
     } on FirebaseAuthException catch (e) {
       setState(() {
-        errorMessage = e.message;
+        if  (e.code == 'email-already-in-use') {
+          errorMessage = 'Email is already registered! Please login instead.';
+          return;
+        } else {
+          errorMessage = e.message;
+        }
       });
     } finally {
       setState(() {
@@ -85,6 +94,10 @@ class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderSt
   @override
   void dispose() {
     _controller.dispose();
+    _controllerEmail.dispose();
+    _controllerFullName.dispose();
+    _controllerPassword.dispose();
+    _controllerConfirmPassword.dispose();
     super.dispose();
   }
 
@@ -144,54 +157,28 @@ class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderSt
                         ),
                         const SizedBox(width: 18),
                         AnimatedBuilder(
-                          animation: _controller,
-                          builder: (context, child) {
-                            return Transform.rotate(
-                              angle: _controller.value * 2 * pi,
-                              child: SvgPicture.asset(
-                                'assets/thistleLOGO.svg',
-                                width: 56,
-                                height: 56,
-                              ),
-                            );
-                          }
+                            animation: _controller,
+                            builder: (context, child) {
+                              return Transform.rotate(
+                                angle: _controller.value * 2 * pi,
+                                child: SvgPicture.asset(
+                                  'assets/thistleLOGO.svg',
+                                  width: 56,
+                                  height: 56,
+                                ),
+                              );
+                            }
                         ),
                       ],
                     ),
                     Padding(
                       padding: EdgeInsets.fromLTRB(padding, 4, padding, 12),
                       child: Form(
-                        key: _formKey,
-                        child: Column(
-                          children: <Widget>[
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 20),
-                              child: ClipRRect(
-                                child: BackdropFilter(
-                                  filter: ImageFilter.blur(
-                                    sigmaX: 8,
-                                    sigmaY: 8,
-                                  ),
-                                  child: TextFormField(
-                                    controller: _controllerEmail,
-                                    decoration: formStyle.copyWith(hintText: 'email'),
-                                    style: textStyle.copyWith(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w500,
-                                      color: const Color(0xC82B1A4E),
-                                    ),
-                                    onTapOutside: (event) {
-                                      FocusManager.instance.primaryFocus?.unfocus();
-                                    },
-                                  ),
-
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: isLogin ? EdgeInsets.zero : const EdgeInsets.only(bottom: 20),
-                              child: Visibility(
-                                visible: !isLogin,
+                          key: _formKey,
+                          child: Column(
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 20),
                                 child: ClipRRect(
                                   child: BackdropFilter(
                                     filter: ImageFilter.blur(
@@ -199,8 +186,8 @@ class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderSt
                                       sigmaY: 8,
                                     ),
                                     child: TextFormField(
-                                      controller: _controllerFullName,
-                                      decoration: formStyle.copyWith(hintText: 'full name'),
+                                      controller: _controllerEmail,
+                                      decoration: formStyle.copyWith(hintText: 'email'),
                                       style: textStyle.copyWith(
                                         fontSize: 20,
                                         fontWeight: FontWeight.w500,
@@ -210,38 +197,38 @@ class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderSt
                                         FocusManager.instance.primaryFocus?.unfocus();
                                       },
                                     ),
+
                                   ),
                                 ),
                               ),
-                            ),
-                            Padding(
-                              padding: isLogin ? const EdgeInsets.only(bottom: 24) : const EdgeInsets.only(bottom: 20),
-                              child: ClipRRect(
-                                child: BackdropFilter(
-                                  filter: ImageFilter.blur(
-                                    sigmaX: 8,
-                                    sigmaY: 8,
-                                  ),
-                                  child: TextFormField(
-                                    controller: _controllerPassword,
-                                    decoration: formStyle.copyWith(hintText: 'password'),
-                                    obscureText: true,
-                                    style: textStyle.copyWith(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w500,
-                                      color: const Color(0xC82B1A4E),
+                              Padding(
+                                padding: isLogin ? EdgeInsets.zero : const EdgeInsets.only(bottom: 20),
+                                child: Visibility(
+                                  visible: !isLogin,
+                                  child: ClipRRect(
+                                    child: BackdropFilter(
+                                      filter: ImageFilter.blur(
+                                        sigmaX: 8,
+                                        sigmaY: 8,
+                                      ),
+                                      child: TextFormField(
+                                        controller: _controllerFullName,
+                                        decoration: formStyle.copyWith(hintText: 'full name'),
+                                        style: textStyle.copyWith(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w500,
+                                          color: const Color(0xC82B1A4E),
+                                        ),
+                                        onTapOutside: (event) {
+                                          FocusManager.instance.primaryFocus?.unfocus();
+                                        },
+                                      ),
                                     ),
-                                    onTapOutside: (event) {
-                                      FocusManager.instance.primaryFocus?.unfocus();
-                                    },
                                   ),
                                 ),
                               ),
-                            ),
-                            Padding(
-                              padding: isLogin ? EdgeInsets.zero : const EdgeInsets.only(bottom: 24),
-                              child: Visibility(
-                                visible: !isLogin,
+                              Padding(
+                                padding: isLogin ? const EdgeInsets.only(bottom: 24) : const EdgeInsets.only(bottom: 20),
                                 child: ClipRRect(
                                   child: BackdropFilter(
                                     filter: ImageFilter.blur(
@@ -249,8 +236,8 @@ class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderSt
                                       sigmaY: 8,
                                     ),
                                     child: TextFormField(
-                                      controller: _controllerConfirmPassword,
-                                      decoration: formStyle.copyWith(hintText: 'confirm password'),
+                                      controller: _controllerPassword,
+                                      decoration: formStyle.copyWith(hintText: 'password'),
                                       obscureText: true,
                                       style: textStyle.copyWith(
                                         fontSize: 20,
@@ -264,55 +251,99 @@ class _ThistleAuthPageState extends State<ThistleAuthPage> with TickerProviderSt
                                   ),
                                 ),
                               ),
-                            ),
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  if (!isLogin && _controllerPassword.text != _controllerConfirmPassword.text) {
-                                    setState(() {
-                                      errorMessage = 'Passwords do not match! Please try again';
-                                    });
-                                    return;
-                                  }
-                                  if (_formKey.currentState!.validate() && !_isRegistering) {
-                                    isLogin ? signInWithEmailAndPassword() : createUserWithEmailAndPassword();
-                                  }
-                                },
-                                style: buttonStyle.copyWith(padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 20))),
-                                child: _isRegistering || _isSigningIn ? progressIndicator : Text(isLogin ? 'sign in' : 'register'),
+                              Padding(
+                                padding: isLogin ? EdgeInsets.zero : const EdgeInsets.only(bottom: 24),
+                                child: Visibility(
+                                  visible: !isLogin,
+                                  child: ClipRRect(
+                                    child: BackdropFilter(
+                                      filter: ImageFilter.blur(
+                                        sigmaX: 8,
+                                        sigmaY: 8,
+                                      ),
+                                      child: TextFormField(
+                                        controller: _controllerConfirmPassword,
+                                        decoration: formStyle.copyWith(hintText: 'confirm password'),
+                                        obscureText: true,
+                                        style: textStyle.copyWith(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w500,
+                                          color: const Color(0xC82B1A4E),
+                                        ),
+                                        onTapOutside: (event) {
+                                          FocusManager.instance.primaryFocus?.unfocus();
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ],
-                        )
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    if (!isLogin && _controllerFullName.text.isEmpty) {
+                                      setState(() {
+                                        errorMessage = 'Full name field cannot be empty! Please try again.';
+                                      });
+                                      return;
+                                    }
+                                    if (_controllerPassword.text.isEmpty) {
+                                      setState(() {
+                                        errorMessage = 'Please provide a password and try again.';
+                                      });
+                                      return;
+                                    }
+                                    if (!isLogin && _controllerPassword.text != _controllerConfirmPassword.text) {
+                                      setState(() {
+                                        errorMessage = 'Passwords do not match! Please try again.';
+                                      });
+                                      return;
+                                    }
+                                    if (_formKey.currentState!.validate() && !_isRegistering) {
+                                      isLogin ? signInWithEmailAndPassword() : createUserWithEmailAndPassword();
+                                    }
+                                  },
+                                  style: buttonStyle.copyWith(padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 20))),
+                                  child: _isRegistering || _isSigningIn ? progressIndicator : Text(isLogin ? 'sign in' : 'register'),
+                                ),
+                              ),
+
+                            ],
+                          )
                       ),
                     ),
                     RichText(text: TextSpan(
-                      style: textStyle.copyWith(fontSize: 18),
-                      children: <TextSpan>[
-                        TextSpan(
-                          text: isLogin ? 'Not an existing user? Register ' : 'Already have an account? Sign in '
-                        ),
-                        TextSpan(
-                          text: 'here.',
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                          recognizer: TapGestureRecognizer()..onTap = () {
-                            setState(() {
-                              isLogin = !isLogin;
-                            });
-                          }
-                        ),
-                      ]
+                        style: textStyle.copyWith(fontSize: 18),
+                        children: <TextSpan>[
+                          TextSpan(
+                              text: isLogin ? 'Not an existing user? Register ' : 'Already have an account? Sign in '
+                          ),
+                          TextSpan(
+                              text: 'here.',
+                              style: const TextStyle(fontWeight: FontWeight.w600),
+                              recognizer: TapGestureRecognizer()..onTap = () {
+                                _controllerEmail.clear();
+                                _controllerFullName.clear();
+                                _controllerPassword.clear();
+                                _controllerConfirmPassword.clear();
+                                errorMessage = '';
+                                setState(() {
+                                  isLogin = !isLogin;
+                                });
+                              }
+                          ),
+                        ]
                     )),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 15),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 50),
+                      padding: const EdgeInsets.symmetric(horizontal: 30),
                       child: Text(
-                        errorMessage == '' ? '' : 'ERROR: $errorMessage',
+                        errorMessage == '' ? '' : '$errorMessage',
                         textAlign: TextAlign.center,
                         style: textStyle.copyWith(
                           color: Colors.red,
-                          fontSize: 14,
+                          fontSize: 13,
                         ),
                       ),
                     ),

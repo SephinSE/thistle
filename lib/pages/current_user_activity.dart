@@ -43,48 +43,43 @@ class ThistleCurrentUserActivityPage extends StatelessWidget {
 
               final posts = snapshot.data!.docs;
 
-              return ListView.builder(
-                itemCount: posts.length,
-                itemBuilder: (context, index) {
-                  final post = posts[index].data() as Map<String, dynamic>;
-                  final userName = post['userName'] ?? 'Unknown User';
-                  final timestamp = post['timestamp']?.toDate();
-                  final postCaption = post['caption'] ?? 'No caption';
-                  final postImageURL = post['imageURL'] ?? '';
+              return Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: ListView.builder(
+                  itemCount: posts.length,
+                  itemBuilder: (context, index) {
+                    final post = posts[index].data() as Map<String, dynamic>;
+                    final userName = post['userName'] ?? 'Unknown User';
+                    final timestamp = post['timestamp']?.toDate();
+                    final postCaption = post['caption'] ?? 'No caption';
+                    final postImageURL = post['imageURL'] ?? '';
 
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: postImageURL.isNotEmpty
-                          ? NetworkImage(postImageURL)
-                          : null,
-                      child: postImageURL.isEmpty
-                          ? const Icon(Icons.person)
-                          : null,
-                    ),
-                    trailing: SizedBox(
-                      child: Image.network(postImageURL),
-                      width: 45,
-                    ),
-                    title: Text('$userName\'s post that you liked', style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: AppStyles.thistleColor,
-                      fontSize: 16,
-                    ),),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: 220,
-                          child: Text(postCaption, maxLines: 1, overflow: TextOverflow.ellipsis),
-                        ),
-                        if (timestamp != null)
-                          Text(
-                            DateFormat('dd MMMM yyyy, hh:mm a').format(timestamp.toLocal()), // Format timestamp
+                    return ListTile(
+                      leading: SizedBox(
+                        width: 85,
+                        child: Image.network(postImageURL),
+                      ),
+                      title: Text('You liked $userName\'s post', style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppStyles.thistleColor,
+                        fontSize: 16,
+                      ),),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            width: 220,
+                            child: Text(postCaption, maxLines: 1, overflow: TextOverflow.ellipsis),
                           ),
-                      ],
-                    ),
-                  );
-                },
+                          if (timestamp != null)
+                            Text(
+                              DateFormat('dd MMMM yyyy, hh:mm a').format(timestamp.toLocal()), // Format timestamp
+                            ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               );
             },
           ),
