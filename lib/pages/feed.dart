@@ -62,14 +62,16 @@ class _ThistleFeedPageState extends State<ThistleFeedPage> {
       for (var doc in querySnapshot.docs) {
         final userId = doc['userId'];
         if (!_userProfilePics.containsKey(userId)) {
-          final userDoc =
-          await _firestore.collection('users').doc(userId).get();
+          final userDoc = await _firestore.collection('users').doc(userId).get();
           if (userDoc.exists) {
-            _userProfilePics[userId] =
-                userDoc['photoURL'] ?? 'https://example.com/default_profile_pic.png';
+            // Check if 'photoURL' field exists in the userDoc
+            if (userDoc.data()!.containsKey('photoURL')) {
+              _userProfilePics[userId] = userDoc['photoURL'];
+            } else {
+              _userProfilePics[userId] = 'https://example.com/default_profile_pic.png';
+            }
           } else {
-            _userProfilePics[userId] =
-            'https://example.com/default_profile_pic.png';
+            _userProfilePics[userId] = 'https://example.com/default_profile_pic.png';
             print("User document for userId $userId does not exist.");
           }
         }
@@ -85,6 +87,7 @@ class _ThistleFeedPageState extends State<ThistleFeedPage> {
       _isLoading = false;
     });
   }
+
 
   void _scrollListener() {
     if (_scrollController.position.pixels ==
